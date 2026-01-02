@@ -1,21 +1,15 @@
 # TelemetryX - Production Stack (for EC2)
 # ============================================
 # Uses AWS RDS for Postgres and ElastiCache for Redis
-# Only runs the application containers
+# Images are pulled from AWS ECR
 #
 # Usage: docker compose -f docker-compose.prod.yml up -d
 # ============================================
 
 services:
-  # ============================================
-  # APPLICATION SERVICES
-  # ============================================
-  # Note: Postgres and Redis are on AWS (RDS/ElastiCache)
-  # Connection strings come from environment variables
-
   # Rust: Event Ingestion Service
   rust-ingestion:
-    image: ${ECR_REGISTRY:-telemetryx}/telemetryx-ingestion:${IMAGE_TAG:-latest}
+    image: ${ECR_REGISTRY}/telemetryx-ingestion:${IMAGE_TAG:-latest}
     container_name: telemetryx-ingestion
     restart: unless-stopped
     ports:
@@ -37,7 +31,7 @@ services:
 
   # Rust: REST + WebSocket API
   rust-api:
-    image: ${ECR_REGISTRY:-telemetryx}/telemetryx-api:${IMAGE_TAG:-latest}
+    image: ${ECR_REGISTRY}/telemetryx-api:${IMAGE_TAG:-latest}
     container_name: telemetryx-api
     restart: unless-stopped
     ports:
@@ -52,8 +46,7 @@ services:
       REST_PORT: 8081
       WS_PORT: 8082
     depends_on:
-      python-brain:
-        condition: service_healthy
+      - python-brain
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 30s
@@ -65,7 +58,7 @@ services:
 
   # Python: Brain (Rules Engine + ML)
   python-brain:
-    image: ${ECR_REGISTRY:-telemetryx}/telemetryx-brain:${IMAGE_TAG:-latest}
+    image: ${ECR_REGISTRY}/telemetryx-brain:${IMAGE_TAG:-latest}
     container_name: telemetryx-python-brain
     restart: unless-stopped
     ports:
@@ -89,4 +82,3 @@ networks:
   telemetryx-network:
     name: telemetryx-network
     driver: bridge
-
