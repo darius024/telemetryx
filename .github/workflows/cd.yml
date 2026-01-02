@@ -20,80 +20,84 @@ jobs:
   # ============================================
   # Build and Push Docker Images to AWS ECR
   # ============================================
-  # TODO: Uncomment when Dockerfiles are complete (rust/ and python/ folders exist)
-  #
-  # build:
-  #   name: Build & Push Images
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     image-tag: ${{ steps.meta.outputs.version }}
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
-  #
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v2
-  #
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #
-  #     - name: Generate image tag
-  #       id: meta
-  #       run: |
-  #         if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-  #           VERSION=${GITHUB_REF#refs/tags/v}
-  #         else
-  #           VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-  #         fi
-  #         echo "version=$VERSION" >> $GITHUB_OUTPUT
-  #         echo "Image tag: $VERSION"
-  #
-  #     - name: Build and push rust-ingestion
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         file: infra/docker/Dockerfile.rust
-  #         build-args: SERVICE_NAME=ingestion
-  #         push: true
-  #         tags: ${{ env.ECR_REGISTRY }}/telemetryx-ingestion:${{ steps.meta.outputs.version }},${{ env.ECR_REGISTRY }}/telemetryx-ingestion:latest
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
-  #
-  #     - name: Build and push rust-api
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         file: infra/docker/Dockerfile.rust
-  #         build-args: SERVICE_NAME=api
-  #         push: true
-  #         tags: ${{ env.ECR_REGISTRY }}/telemetryx-api:${{ steps.meta.outputs.version }},${{ env.ECR_REGISTRY }}/telemetryx-api:latest
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
-  #
-  #     - name: Build and push python-brain
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         file: infra/docker/Dockerfile.python
-  #         push: true
-  #         tags: ${{ env.ECR_REGISTRY }}/telemetryx-brain:${{ steps.meta.outputs.version }},${{ env.ECR_REGISTRY }}/telemetryx-brain:latest
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
+  build:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate image tag
+        id: meta
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Image tag: $VERSION"
+
+      - name: Build and push rust-ingestion
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.rust
+          build-args: SERVICE_NAME=ingestion
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/telemetryx-ingestion:${{ steps.meta.outputs.version }}
+            ${{ env.ECR_REGISTRY }}/telemetryx-ingestion:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push rust-api
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.rust
+          build-args: SERVICE_NAME=api
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/telemetryx-api:${{ steps.meta.outputs.version }}
+            ${{ env.ECR_REGISTRY }}/telemetryx-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push python-brain
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.python
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/telemetryx-brain:${{ steps.meta.outputs.version }}
+            ${{ env.ECR_REGISTRY }}/telemetryx-brain:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ============================================
   # Deploy to EC2 (Staging)
   # ============================================
   deploy-staging:
     name: Deploy to Staging
-    # needs: build  # Uncomment when build job is enabled
+    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     environment: staging
@@ -107,56 +111,58 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "infra/docker-compose.yml,infra/docker-compose.prod.yml"
+          source: "infra/docker-compose.prod.yml"
           target: "/home/ubuntu/telemetryx"
           strip_components: 1
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DATABASE_URL,REDIS_URL,AWS_REGION,AWS_ECR_REGISTRY,IMAGE_TAG
           script: |
             echo "=== Deploying TelemetryX to Staging ==="
-            
-            # Navigate to app directory
             cd /home/ubuntu/telemetryx
-            
-            # Create .env file with secrets
-            cat > .env << 'EOF'
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            REDIS_URL=${{ secrets.REDIS_URL }}
+
+            # Create .env file
+            cat > .env <<EOF
+            DATABASE_URL=${DATABASE_URL}
+            REDIS_URL=${REDIS_URL}
             RUST_LOG=info
             PYTHON_ENV=staging
+            ECR_REGISTRY=${AWS_ECR_REGISTRY}
+            IMAGE_TAG=${IMAGE_TAG}
             EOF
-            
-            # For now, just start infrastructure (Postgres and Redis are on AWS)
-            # When app code exists, uncomment the full deployment:
-            
-            # # Login to ECR
-            # aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-            #   docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
-            
-            # # Pull latest images
-            # docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-ingestion:latest
-            # docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-api:latest
-            # docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-brain:latest
-            
-            # # Deploy with docker-compose
-            # docker compose -f docker-compose.prod.yml pull
-            # docker compose -f docker-compose.prod.yml up -d
-            
+
+            # Login to ECR
+            aws ecr get-login-password --region ${AWS_REGION} | \
+              docker login --username AWS --password-stdin ${AWS_ECR_REGISTRY}
+
+            # Pull latest images
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-ingestion:latest
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-api:latest
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-brain:latest
+
+            # Deploy with docker-compose
+            docker compose -f docker-compose.prod.yml up -d
+
             echo "=== Deployment complete ==="
-            echo "Current containers:"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
   # ============================================
   # Deploy to EC2 (Production)
   # ============================================
   deploy-production:
     name: Deploy to Production
-    # needs: build  # Uncomment when build job is enabled
+    needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     environment: production
@@ -170,55 +176,61 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "infra/docker-compose.yml,infra/docker-compose.prod.yml"
+          source: "infra/docker-compose.prod.yml"
           target: "/home/ubuntu/telemetryx"
           strip_components: 1
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DATABASE_URL,REDIS_URL,AWS_REGION,AWS_ECR_REGISTRY,IMAGE_TAG
           script: |
             echo "=== Deploying TelemetryX to Production ==="
-            
-            # Navigate to app directory
             cd /home/ubuntu/telemetryx
-            
-            # Create .env file with secrets
-            cat > .env << 'EOF'
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            REDIS_URL=${{ secrets.REDIS_URL }}
+
+            # Create .env file
+            cat > .env <<EOF
+            DATABASE_URL=${DATABASE_URL}
+            REDIS_URL=${REDIS_URL}
             RUST_LOG=warn
             PYTHON_ENV=production
+            ECR_REGISTRY=${AWS_ECR_REGISTRY}
+            IMAGE_TAG=${IMAGE_TAG}
             EOF
-            
+
             # Login to ECR
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-              docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
-            
-            # Pull specific version (from git tag)
-            VERSION=${GITHUB_REF#refs/tags/v}
-            docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-ingestion:$VERSION
-            docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-api:$VERSION
-            docker pull ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-brain:$VERSION
-            
+            aws ecr get-login-password --region ${AWS_REGION} | \
+              docker login --username AWS --password-stdin ${AWS_ECR_REGISTRY}
+
+            # Pull specific version
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-ingestion:${IMAGE_TAG}
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-api:${IMAGE_TAG}
+            docker pull ${AWS_ECR_REGISTRY}/telemetryx-brain:${IMAGE_TAG}
+
             # Tag as latest for docker-compose
-            docker tag ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-ingestion:$VERSION \
-              ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-ingestion:latest
-            docker tag ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-api:$VERSION \
-              ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-api:latest
-            docker tag ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-brain:$VERSION \
-              ${{ secrets.AWS_ECR_REGISTRY }}/telemetryx-brain:latest
-            
+            docker tag ${AWS_ECR_REGISTRY}/telemetryx-ingestion:${IMAGE_TAG} \
+              ${AWS_ECR_REGISTRY}/telemetryx-ingestion:latest
+            docker tag ${AWS_ECR_REGISTRY}/telemetryx-api:${IMAGE_TAG} \
+              ${AWS_ECR_REGISTRY}/telemetryx-api:latest
+            docker tag ${AWS_ECR_REGISTRY}/telemetryx-brain:${IMAGE_TAG} \
+              ${AWS_ECR_REGISTRY}/telemetryx-brain:latest
+
             # Deploy with docker-compose
             docker compose -f docker-compose.prod.yml up -d
-            
+
             # Health check
             sleep 10
             echo "=== Health Check ==="
             curl -f http://localhost:8081/health || echo "API health check pending"
-            
+
             echo "=== Production Deployment Complete ==="
             docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

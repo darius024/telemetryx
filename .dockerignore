@@ -16,9 +16,7 @@
 # --------------------------------------------
 **/target/
 **/*.rs.bk
-Cargo.lock
-# Note: Include Cargo.lock for reproducible builds
-# Remove the line above if you want reproducible builds
+# Note: Cargo.lock is NOT excluded - included for reproducible builds
 
 # --------------------------------------------
 # Python

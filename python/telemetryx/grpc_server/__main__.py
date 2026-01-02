@@ -12,10 +12,10 @@ def main() -> None:
     """Start the gRPC server."""
     host = os.getenv("GRPC_HOST", "0.0.0.0")
     port = os.getenv("GRPC_PORT", "50051")
-    
+
     print(f"TelemetryX Python Brain starting on {host}:{port}")
     print("TODO: Implement gRPC server")
-    
+
     # TODO: Implement your gRPC server here
     # Keep the process running for now
     try:
@@ -28,4 +28,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
