@@ -1,5 +1,5 @@
 //! TelemetryX API Service
-//! 
+//!
 //! REST + WebSocket API for querying analytics.
 //! TODO: Implement your API logic here.
 
@@ -27,4 +27,3 @@ async fn main() -> anyhow::Result<()> {
         tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
     }
 }
-

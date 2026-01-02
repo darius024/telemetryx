@@ -1,5 +1,5 @@
 //! TelemetryX Common - Shared types and utilities
-//! 
+//!
 //! TODO: Add your shared types here
 
 /// Placeholder module - implement your shared types
@@ -20,4 +20,3 @@ mod tests {
         assert!(true);
     }
 }
-

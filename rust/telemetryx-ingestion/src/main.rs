@@ -1,5 +1,5 @@
 //! TelemetryX Ingestion Service
-//! 
+//!
 //! High-performance event ingestion service.
 //! TODO: Implement your ingestion logic here.
 
@@ -27,4 +27,3 @@ async fn main() -> anyhow::Result<()> {
         tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
     }
 }
-
