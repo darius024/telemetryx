@@ -26,10 +26,6 @@ TelemetryX is a **real-time analytics platform** that ingests high-volume events
 
 The architecture combines **Rust's raw performance** for the data plane with **Python's flexibility** for business logic and machine learning — the best of both worlds.
 
-### The Pitch
-
-> *"Built a high-throughput analytics pipeline handling 100K+ events/sec using Rust and Python, featuring real-time anomaly detection and sub-10ms P99 latency."*
-
 ---
 
 ## 🏗️ Architecture

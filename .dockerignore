@@ -1,0 +1,120 @@
+# ============================================
+# TelemetryX Docker Ignore
+# ============================================
+# Prevents unnecessary files from being copied
+# into Docker build context (faster builds, smaller images)
+
+# --------------------------------------------
+# Git
+# --------------------------------------------
+.git/
+.gitignore
+.gitattributes
+
+# --------------------------------------------
+# Rust
+# --------------------------------------------
+**/target/
+**/*.rs.bk
+Cargo.lock
+# Note: Include Cargo.lock for reproducible builds
+# Remove the line above if you want reproducible builds
+
+# --------------------------------------------
+# Python
+# --------------------------------------------
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+*.whl
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# --------------------------------------------
+# Environment & Secrets
+# --------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# --------------------------------------------
+# IDE & Editors
+# --------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --------------------------------------------
+# Documentation (not needed in runtime image)
+# --------------------------------------------
+docs/
+*.md
+!README.md
+LICENSE
+
+# --------------------------------------------
+# CI/CD & Infrastructure
+# --------------------------------------------
+.github/
+.gitlab-ci.yml
+.circleci/
+Jenkinsfile
+Makefile
+docker-compose*.yml
+infra/
+!infra/docker/
+
+# --------------------------------------------
+# Testing
+# --------------------------------------------
+tests/
+test/
+*_test.rs
+test_*.py
+*_test.py
+conftest.py
+pytest.ini
+tox.ini
+
+# --------------------------------------------
+# Logs & Temporary Files
+# --------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# --------------------------------------------
+# Misc
+# --------------------------------------------
+*.zip
+*.tar.gz
+*.rar
+node_modules/
+.npm/
+
