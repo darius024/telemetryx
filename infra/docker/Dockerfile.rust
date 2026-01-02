@@ -1,22 +1,58 @@
 # TelemetryX - Rust Services Dockerfile
 # ============================================
-# This Dockerfile will be completed when Rust code exists.
-#
+# Multi-stage build for minimal image size
+# 
 # Build with:
 #   docker build -f infra/docker/Dockerfile.rust \
 #     --build-arg SERVICE_NAME=ingestion \
 #     -t telemetryx-ingestion .
-#
-# Structure:
-#   Stage 1 (builder): rust:1.75-slim-bookworm
-#     - Install: pkg-config, libssl-dev, protobuf-compiler
-#     - Copy Cargo.toml files for dependency caching
-#     - Build release binary
-#
-#   Stage 2 (runtime): debian:bookworm-slim
-#     - Copy only the compiled binary
-#     - Run as non-root user
-#     - Expose port 8080
-#
-# TODO: Uncomment and complete when rust/ folder exists
 # ============================================
+
+# Stage 1: Builder
+FROM rust:1.75-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+ARG SERVICE_NAME=ingestion
+
+# Copy workspace files
+COPY rust/Cargo.toml rust/Cargo.lock* ./
+COPY rust/telemetryx-common ./telemetryx-common
+COPY rust/telemetryx-ingestion ./telemetryx-ingestion
+COPY rust/telemetryx-api ./telemetryx-api
+
+# Build the specified service
+RUN cargo build --release --package telemetryx-${SERVICE_NAME}
+
+# Stage 2: Runtime
+FROM debian:bookworm-slim AS runtime
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash appuser
+
+WORKDIR /app
+
+ARG SERVICE_NAME=ingestion
+
+COPY --from=builder /app/target/release/telemetryx-${SERVICE_NAME} ./service
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["./service"]

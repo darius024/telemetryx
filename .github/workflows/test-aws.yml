@@ -70,16 +70,13 @@ jobs:
             echo "=== Testing Database Connection ==="
             
             # Install psql if not present
-            which psql || sudo apt-get update && sudo apt-get install -y postgresql-client
+            which psql || (sudo apt-get update && sudo apt-get install -y postgresql-client)
             
             # Test PostgreSQL connection
-            # Extract host from DATABASE_URL
             DATABASE_URL="${{ secrets.DATABASE_URL }}"
             
-            # Parse the URL (format: postgres://user:pass@host:port/db)
             if [[ -n "$DATABASE_URL" ]]; then
               echo "Testing PostgreSQL connection..."
-              # Use psql to test connection
               psql "$DATABASE_URL" -c "SELECT 1 as connection_test;" && echo "✓ PostgreSQL connection successful!" || echo "✗ PostgreSQL connection failed"
             else
               echo "DATABASE_URL not set"
@@ -93,12 +90,20 @@ jobs:
             
             REDIS_URL="${{ secrets.REDIS_URL }}"
             if [[ -n "$REDIS_URL" ]]; then
-              # Extract host from redis://host:port
-              REDIS_HOST=$(echo "$REDIS_URL" | sed 's|redis://||' | cut -d: -f1)
-              REDIS_PORT=$(echo "$REDIS_URL" | sed 's|redis://||' | cut -d: -f2)
+              # Handle both redis:// and rediss:// (TLS)
+              # Remove protocol prefix (redis:// or rediss://)
+              REDIS_NO_PROTO=$(echo "$REDIS_URL" | sed -E 's|rediss?://||')
+              REDIS_HOST=$(echo "$REDIS_NO_PROTO" | cut -d: -f1)
+              REDIS_PORT=$(echo "$REDIS_NO_PROTO" | cut -d: -f2)
               
-              echo "Testing Redis at $REDIS_HOST:$REDIS_PORT..."
-              redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping && echo "✓ Redis connection successful!" || echo "✗ Redis connection failed"
+              # Check if TLS is required (rediss://)
+              if [[ "$REDIS_URL" == rediss://* ]]; then
+                echo "Testing Redis (TLS) at $REDIS_HOST:$REDIS_PORT..."
+                redis-cli --tls -h "$REDIS_HOST" -p "$REDIS_PORT" ping && echo "✓ Redis connection successful!" || echo "✗ Redis connection failed"
+              else
+                echo "Testing Redis at $REDIS_HOST:$REDIS_PORT..."
+                redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping && echo "✓ Redis connection successful!" || echo "✗ Redis connection failed"
+              fi
             else
               echo "REDIS_URL not set"
             fi

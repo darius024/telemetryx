@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telemetryx"
+version = "0.1.0"
+description = "TelemetryX Python Brain - Rules Engine & ML"
+requires-python = ">=3.11"
+dependencies = [
+    "grpcio>=1.60.0",
+    "grpcio-tools>=1.60.0",
+    "pydantic>=2.0.0",
+    "structlog>=24.0.0",
+    "redis>=5.0.0",
+    "psycopg[binary]>=3.1.0",
+    "polars>=0.20.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
