@@ -42,6 +42,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:v0.12.0
 
       - name: Generate image tag
         id: meta
@@ -61,6 +64,7 @@ jobs:
           file: infra/docker/Dockerfile.rust
           build-args: SERVICE_NAME=ingestion
           push: true
+          provenance: false
           tags: |
             ${{ env.ECR_REGISTRY }}/telemetryx-ingestion:${{ steps.meta.outputs.version }}
             ${{ env.ECR_REGISTRY }}/telemetryx-ingestion:latest
@@ -74,6 +78,7 @@ jobs:
           file: infra/docker/Dockerfile.rust
           build-args: SERVICE_NAME=api
           push: true
+          provenance: false
           tags: |
             ${{ env.ECR_REGISTRY }}/telemetryx-api:${{ steps.meta.outputs.version }}
             ${{ env.ECR_REGISTRY }}/telemetryx-api:latest
@@ -86,6 +91,7 @@ jobs:
           context: .
           file: infra/docker/Dockerfile.python
           push: true
+          provenance: false
           tags: |
             ${{ env.ECR_REGISTRY }}/telemetryx-brain:${{ steps.meta.outputs.version }}
             ${{ env.ECR_REGISTRY }}/telemetryx-brain:latest
