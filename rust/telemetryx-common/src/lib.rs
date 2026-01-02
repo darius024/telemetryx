@@ -15,8 +15,16 @@ pub mod types {
 
 #[cfg(test)]
 mod tests {
+    use super::types::Event;
+
     #[test]
-    fn placeholder_test() {
-        assert!(true);
+    fn event_can_be_created() {
+        let event = Event {
+            id: "test-123".to_string(),
+            timestamp: 1234567890,
+            payload: serde_json::json!({"key": "value"}),
+        };
+        assert_eq!(event.id, "test-123");
+        assert_eq!(event.timestamp, 1234567890);
     }
 }
