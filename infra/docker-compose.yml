@@ -1,11 +1,11 @@
 # TelemetryX - Local Development Stack
-# Run with: docker compose up -d
-# Stop with: docker compose down
+# ============================================
+# Run infrastructure:  docker compose up -d
+# Stop all:            docker compose down
+# ============================================
 
 services:
-  # ============================================
   # PostgreSQL Database
-  # ============================================
   postgres:
     image: postgres:16-alpine
     container_name: telemetryx-postgres
@@ -26,9 +26,7 @@ services:
     networks:
       - telemetryx-network
 
-  # ============================================
   # Redis Cache
-  # ============================================
   redis:
     image: redis:7-alpine
     container_name: telemetryx-redis
@@ -46,18 +44,75 @@ services:
     networks:
       - telemetryx-network
 
-# ============================================
-# Persistent Volumes
-# ============================================
+  # ============================================
+  # APPLICATION SERVICES (uncomment when code exists)
+  # ============================================
+
+  # rust-ingestion:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/docker/Dockerfile.rust
+  #     args:
+  #       SERVICE_NAME: ingestion
+  #   container_name: telemetryx-ingestion
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     DATABASE_URL: postgres://${POSTGRES_USER:-telemetryx}:${POSTGRES_PASSWORD:-localdev123}@postgres:5432/${POSTGRES_DB:-telemetryx}
+  #     REDIS_URL: redis://redis:6379
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - telemetryx-network
+
+  # rust-api:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/docker/Dockerfile.rust
+  #     args:
+  #       SERVICE_NAME: api
+  #   container_name: telemetryx-api
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     DATABASE_URL: postgres://${POSTGRES_USER:-telemetryx}:${POSTGRES_PASSWORD:-localdev123}@postgres:5432/${POSTGRES_DB:-telemetryx}
+  #     REDIS_URL: redis://redis:6379
+  #     GRPC_ENDPOINT: http://python-brain:50051
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - telemetryx-network
+
+  # python-brain:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/docker/Dockerfile.python
+  #   container_name: telemetryx-python-brain
+  #   ports:
+  #     - "50051:50051"
+  #   environment:
+  #     DATABASE_URL: postgres://${POSTGRES_USER:-telemetryx}:${POSTGRES_PASSWORD:-localdev123}@postgres:5432/${POSTGRES_DB:-telemetryx}
+  #     REDIS_URL: redis://redis:6379
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - telemetryx-network
+
 volumes:
   postgres_data:
     name: telemetryx-postgres-data
   redis_data:
     name: telemetryx-redis-data
 
-# ============================================
-# Network
-# ============================================
 networks:
   telemetryx-network:
     name: telemetryx-network

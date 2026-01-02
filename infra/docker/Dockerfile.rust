@@ -1,0 +1,22 @@
+# TelemetryX - Rust Services Dockerfile
+# ============================================
+# This Dockerfile will be completed when Rust code exists.
+#
+# Build with:
+#   docker build -f infra/docker/Dockerfile.rust \
+#     --build-arg SERVICE_NAME=ingestion \
+#     -t telemetryx-ingestion .
+#
+# Structure:
+#   Stage 1 (builder): rust:1.75-slim-bookworm
+#     - Install: pkg-config, libssl-dev, protobuf-compiler
+#     - Copy Cargo.toml files for dependency caching
+#     - Build release binary
+#
+#   Stage 2 (runtime): debian:bookworm-slim
+#     - Copy only the compiled binary
+#     - Run as non-root user
+#     - Expose port 8080
+#
+# TODO: Uncomment and complete when rust/ folder exists
+# ============================================

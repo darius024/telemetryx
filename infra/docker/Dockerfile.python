@@ -1,0 +1,22 @@
+# TelemetryX - Python Brain Dockerfile
+# ============================================
+# This Dockerfile will be completed when Python code exists.
+#
+# Build with:
+#   docker build -f infra/docker/Dockerfile.python \
+#     -t telemetryx-python-brain .
+#
+# Structure:
+#   Stage 1 (builder): python:3.11-slim-bookworm
+#     - Install: gcc, libpq-dev
+#     - Create virtual environment
+#     - Install dependencies from pyproject.toml
+#
+#   Stage 2 (runtime): python:3.11-slim-bookworm
+#     - Copy virtual environment
+#     - Copy application code
+#     - Run as non-root user
+#     - Expose port 50051 (gRPC)
+#
+# TODO: Uncomment and complete when python/ folder exists
+# ============================================
