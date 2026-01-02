@@ -1,0 +1,16 @@
+[package]
+name = "telemetryx-ingestion"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "telemetryx-ingestion"
+path = "src/main.rs"
+
+[dependencies]
+telemetryx-common = { path = "../telemetryx-common" }
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+
