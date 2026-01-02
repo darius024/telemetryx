@@ -1,22 +1,60 @@
 # TelemetryX - Python Brain Dockerfile
 # ============================================
-# This Dockerfile will be completed when Python code exists.
+# Multi-stage build for smaller image
 #
 # Build with:
 #   docker build -f infra/docker/Dockerfile.python \
 #     -t telemetryx-python-brain .
-#
-# Structure:
-#   Stage 1 (builder): python:3.11-slim-bookworm
-#     - Install: gcc, libpq-dev
-#     - Create virtual environment
-#     - Install dependencies from pyproject.toml
-#
-#   Stage 2 (runtime): python:3.11-slim-bookworm
-#     - Copy virtual environment
-#     - Copy application code
-#     - Run as non-root user
-#     - Expose port 50051 (gRPC)
-#
-# TODO: Uncomment and complete when python/ folder exists
 # ============================================
+
+# Stage 1: Builder
+FROM python:3.11-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+WORKDIR /app
+
+# Copy dependency files first (for caching)
+COPY python/pyproject.toml python/README.md ./
+
+# Install dependencies
+RUN pip install --upgrade pip && pip install .
+
+# Copy source code
+COPY python/telemetryx ./telemetryx
+
+# Stage 2: Runtime
+FROM python:3.11-slim-bookworm AS runtime
+
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash appuser
+
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY --from=builder /app/telemetryx ./telemetryx
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 50051
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import socket; s=socket.socket(); s.connect(('localhost', 50051)); s.close()" || exit 1
+
+ENTRYPOINT ["python", "-m", "telemetryx.grpc_server"]
