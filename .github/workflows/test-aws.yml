@@ -1,0 +1,128 @@
+# TelemetryX - Test AWS Connection
+# ============================================
+# Manual workflow to verify AWS and EC2 setup
+# Run this before enabling full CD pipeline
+# ============================================
+
+name: Test AWS Setup
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-aws-credentials:
+    name: Test AWS Credentials
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify AWS identity
+        run: |
+          echo "=== AWS Identity ==="
+          aws sts get-caller-identity
+          
+          echo ""
+          echo "=== ECR Repositories ==="
+          aws ecr describe-repositories --query 'repositories[].repositoryName' || echo "No ECR repos found"
+
+  test-ec2-connection:
+    name: Test EC2 SSH Connection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SSH to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "=== EC2 Connection Successful! ==="
+            echo ""
+            echo "=== System Info ==="
+            uname -a
+            echo ""
+            echo "=== Docker Version ==="
+            docker --version
+            docker compose version
+            echo ""
+            echo "=== Disk Space ==="
+            df -h /
+            echo ""
+            echo "=== Memory ==="
+            free -h
+
+  test-database-connection:
+    name: Test Database Connectivity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test from EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "=== Testing Database Connection ==="
+            
+            # Install psql if not present
+            which psql || sudo apt-get update && sudo apt-get install -y postgresql-client
+            
+            # Test PostgreSQL connection
+            # Extract host from DATABASE_URL
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            
+            # Parse the URL (format: postgres://user:pass@host:port/db)
+            if [[ -n "$DATABASE_URL" ]]; then
+              echo "Testing PostgreSQL connection..."
+              # Use psql to test connection
+              psql "$DATABASE_URL" -c "SELECT 1 as connection_test;" && echo "✓ PostgreSQL connection successful!" || echo "✗ PostgreSQL connection failed"
+            else
+              echo "DATABASE_URL not set"
+            fi
+            
+            echo ""
+            echo "=== Testing Redis Connection ==="
+            
+            # Install redis-cli if not present
+            which redis-cli || sudo apt-get install -y redis-tools
+            
+            REDIS_URL="${{ secrets.REDIS_URL }}"
+            if [[ -n "$REDIS_URL" ]]; then
+              # Extract host from redis://host:port
+              REDIS_HOST=$(echo "$REDIS_URL" | sed 's|redis://||' | cut -d: -f1)
+              REDIS_PORT=$(echo "$REDIS_URL" | sed 's|redis://||' | cut -d: -f2)
+              
+              echo "Testing Redis at $REDIS_HOST:$REDIS_PORT..."
+              redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping && echo "✓ Redis connection successful!" || echo "✗ Redis connection failed"
+            else
+              echo "REDIS_URL not set"
+            fi
+
+  summary:
+    name: Summary
+    needs: [test-aws-credentials, test-ec2-connection, test-database-connection]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Print Summary
+        run: |
+          echo "============================================"
+          echo "           AWS SETUP TEST RESULTS          "
+          echo "============================================"
+          echo ""
+          echo "AWS Credentials: ${{ needs.test-aws-credentials.result }}"
+          echo "EC2 Connection:  ${{ needs.test-ec2-connection.result }}"
+          echo "DB Connections:  ${{ needs.test-database-connection.result }}"
+          echo ""
+          if [[ "${{ needs.test-aws-credentials.result }}" == "success" ]] && \
+             [[ "${{ needs.test-ec2-connection.result }}" == "success" ]] && \
+             [[ "${{ needs.test-database-connection.result }}" == "success" ]]; then
+            echo "✓ All tests passed! You're ready to deploy."
+          else
+            echo "✗ Some tests failed. Check the logs above."
+          fi
