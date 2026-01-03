@@ -22,7 +22,7 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-import common_pb2 as common__pb2
+from telemetryx.proto import common_pb2 as common__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x61nalytics.proto\x12\ntelemetryx\x1a\x0c\x63ommon.proto\"d\n\x16\x44\x65tectAnomaliesRequest\x12!\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x11.telemetryx.Event\x12\x12\n\nmodel_name\x18\x02 \x01(\t\x12\x13\n\x0bsensitivity\x18\x03 \x01(\x01\"`\n\x17\x44\x65tectAnomaliesResponse\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.telemetryx.AnomalyResult\x12\x19\n\x11inference_time_ms\x18\x02 \x01(\x03\"a\n\rAnomalyResult\x12\x10\n\x08\x65vent_id\x18\x01 \x01(\t\x12\x12\n\nis_anomaly\x18\x02 \x01(\x08\x12\x15\n\ranomaly_score\x18\x03 \x01(\x01\x12\x13\n\x0b\x65xplanation\x18\x04 \x01(\t2\xbe\x01\n\x10\x41nalyticsService\x12Z\n\x0f\x44\x65tectAnomalies\x12\".telemetryx.DetectAnomaliesRequest\x1a#.telemetryx.DetectAnomaliesResponse\x12N\n\x0bHealthCheck\x12\x1e.telemetryx.HealthCheckRequest\x1a\x1f.telemetryx.HealthCheckResponseb\x06proto3')

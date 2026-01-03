@@ -1,1 +1,5 @@
-"""gRPC Server for TelemetryX Python Brain"""
+"""gRPC server for TelemetryX Python Brain."""
+
+from telemetryx.grpc_server.server import GrpcServer, serve
+
+__all__ = ["GrpcServer", "serve"]

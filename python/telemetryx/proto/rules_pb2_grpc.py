@@ -3,8 +3,8 @@
 import grpc
 import warnings
 
-import common_pb2 as common__pb2
-import rules_pb2 as rules__pb2
+from telemetryx.proto import common_pb2 as common__pb2
+from telemetryx.proto import rules_pb2 as rules__pb2
 
 GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__

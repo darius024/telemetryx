@@ -22,7 +22,7 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-import common_pb2 as common__pb2
+from telemetryx.proto import common_pb2 as common__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0brules.proto\x12\ntelemetryx\x1a\x0c\x63ommon.proto\"3\n\x0f\x45valuateRequest\x12 \n\x05\x65vent\x18\x01 \x01(\x0b\x32\x11.telemetryx.Event\"V\n\x10\x45valuateResponse\x12&\n\x07matches\x18\x01 \x03(\x0b\x32\x15.telemetryx.RuleMatch\x12\x1a\n\x12\x65valuation_time_ms\x18\x02 \x01(\x03\"|\n\tRuleMatch\x12\x0f\n\x07rule_id\x18\x01 \x01(\t\x12\x11\n\trule_name\x18\x02 \x01(\t\x12&\n\x08severity\x18\x03 \x01(\x0e\x32\x14.telemetryx.Severity\x12#\n\x07\x61\x63tions\x18\x04 \x03(\x0b\x32\x12.telemetryx.Action\"-\n\x06\x41\x63tion\x12\x13\n\x0b\x61\x63tion_type\x18\x01 \x01(\t\x12\x0e\n\x06\x63onfig\x18\x02 \x01(\t*T\n\x08Severity\x12\x18\n\x14SEVERITY_UNSPECIFIED\x10\x00\x12\x08\n\x04INFO\x10\x01\x12\x0b\n\x07WARNING\x10\x02\x12\t\n\x05\x45RROR\x10\x03\x12\x0c\n\x08\x43RITICAL\x10\x04\x32\xaa\x01\n\x0cRulesService\x12J\n\rEvaluateEvent\x12\x1b.telemetryx.EvaluateRequest\x1a\x1c.telemetryx.EvaluateResponse\x12N\n\x0bHealthCheck\x12\x1e.telemetryx.HealthCheckRequest\x1a\x1f.telemetryx.HealthCheckResponseb\x06proto3')
