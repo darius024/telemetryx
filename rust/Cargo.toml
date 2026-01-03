@@ -25,5 +25,5 @@ prost-types = "0.11"
 prost-build = "0.11"
 tonic = { version = "0.9", features = ["transport"] }
 tonic-build = "0.9"
-figment = "0.11"
+figment = "0.10.19"
 
