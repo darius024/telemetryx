@@ -22,4 +22,5 @@ figment.workspace = true
 [build-dependencies]
 prost-build.workspace = true
 tonic-build.workspace = true
+protoc-bin-vendored = "0.11"
 
