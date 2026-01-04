@@ -61,6 +61,6 @@ This document captures the high-level features and acceptance criteria for the R
 cd rust/telemetryx-ingestion
 cargo run --release -- --config ./config/dev.yaml
 # then
-curl -X POST http://127.0.0.1:8080/ingest -d '{"events":[{"id":"1","ts":"2025-01-01T00:00:00Z","payload":{}}]}' -H 'Content-Type: application/json'
+curl -X POST http://127.0.0.1:8080/ingest -d '{"events":[{"event_id":"1","timestamp":1735689600,"payload":{}}]}' -H 'Content-Type: application/json'
 ```
 ---
