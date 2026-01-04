@@ -15,8 +15,8 @@ import grpc
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from grpc_reflection.v1alpha import reflection
 
-from python.telemetryx.grpc_server.handlers import AnalyticsServiceHandler, RulesServiceHandler
-from python.telemetryx.grpc_server.interceptors import LoggingInterceptor
+from telemetryx.grpc_server.handlers import AnalyticsServiceHandler, RulesServiceHandler
+from telemetryx.grpc_server.interceptors import LoggingInterceptor
 from telemetryx.core import Settings, get_logger, setup_logging, get_settings
 
 # Import generated proto services (we'll register handlers later)
