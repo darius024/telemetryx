@@ -8,8 +8,6 @@ This module provides:
 - Health checks
 """
 
-from typing import Any
-
 from redis.asyncio import Redis
 
 from telemetryx.core import get_logger, get_settings

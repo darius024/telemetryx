@@ -1,5 +1,7 @@
 """Shared pytest fixtures for TelemetryX tests."""
 
+import os
+
 import pytest
 
 from telemetryx.core import Settings
@@ -40,3 +42,26 @@ def sample_error_event_data() -> dict:
         "attributes": {"message": "Connection timeout"},
         "value": 0.0,
     }
+
+
+# Database fixtures for integration tests
+
+
+@pytest.fixture
+def postgres_url() -> str | None:
+    """Get PostgreSQL URL for testing.
+
+    Set TEST_DATABASE_URL env var to run integration tests.
+    Returns None if not configured (tests will be skipped).
+    """
+    return os.getenv("TEST_DATABASE_URL")
+
+
+@pytest.fixture
+def redis_url() -> str | None:
+    """Get Redis URL for testing.
+
+    Set TEST_REDIS_URL env var to run integration tests.
+    Returns None if not configured (tests will be skipped).
+    """
+    return os.getenv("TEST_REDIS_URL")

@@ -10,7 +10,6 @@ This module provides:
 from contextlib import asynccontextmanager
 from typing import Any
 
-from psycopg import AsyncConnection, sql
 from psycopg_pool import AsyncConnectionPool
 
 from telemetryx.core import get_logger, get_settings
@@ -81,7 +80,7 @@ async def get_connection():
     async with pool.connection() as conn:
         yield conn
 
-    
+
 async def execute(
     query: str,
     params: tuple[Any, ...] | dict[str, Any] | None = None,
@@ -173,4 +172,3 @@ async def health_check() -> bool:
         return True
     except Exception:
         return False
-        
