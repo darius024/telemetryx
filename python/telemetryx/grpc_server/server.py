@@ -15,6 +15,8 @@ import grpc
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from grpc_reflection.v1alpha import reflection
 
+from python.telemetryx.grpc_server.handlers import AnalyticsServiceHandler, RulesServiceHandler
+from python.telemetryx.grpc_server.interceptors import LoggingInterceptor
 from telemetryx.core import Settings, get_logger, setup_logging, get_settings
 
 # Import generated proto services (we'll register handlers later)
@@ -24,9 +26,9 @@ from telemetryx.proto import rules_pb2_grpc, analytics_pb2_grpc
 
 class GrpcServer:
     """Async gRPC server for TelemetryX Python Brain.
-
+    
     Handles server lifecycle including graceful shutdown.
-
+    
     Example:
         server = GrpcServer()
         await server.start()
@@ -34,11 +36,7 @@ class GrpcServer:
     """
 
     def __init__(self, settings: Settings | None = None) -> None:
-        """Initialize the server.
-
-        Args:
-            settings: Optional settings instance (uses default if not provided)
-        """
+        """Initialize the server."""
         self._settings = settings or get_settings()
         self._server: grpc.aio.Server | None = None
         self._logger = get_logger(__name__, component="grpc-server")
@@ -57,6 +55,7 @@ class GrpcServer:
         # Create the async server
         self._server = grpc.aio.server(
             futures.ThreadPoolExecutor(max_workers=10),
+            interceptors=[LoggingInterceptor()],
             options=[
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),  # 50MB
                 ("grpc.max_send_message_length", 50 * 1024 * 1024),
@@ -76,9 +75,13 @@ class GrpcServer:
             "telemetryx.AnalyticsService", health_pb2.HealthCheckResponse.SERVING
         )
 
-        # TODO: Register actual service handlers (Commit 4)
-        # rules_pb2_grpc.add_RulesServiceServicer_to_server(rules_handler, self._server)
-        # analytics_pb2_grpc.add_AnalyticsServiceServicer_to_server(analytics_handler, self._server)
+        # Register service handlers
+        rules_pb2_grpc.add_RulesServiceServicer_to_server(
+            RulesServiceHandler(), self._server
+        )
+        analytics_pb2_grpc.add_AnalyticsServiceServicer_to_server(
+            AnalyticsServiceHandler(), self._server
+        )
 
         # Enable reflection for debugging with grpcurl
         service_names = (
@@ -114,20 +117,12 @@ class GrpcServer:
             )
 
     async def _handle_signal(self, sig: signal.Signals) -> None:
-        """Handle shutdown signal.
-
-        Args:
-            sig: The signal that was received
-        """
+        """Handle shutdown signal."""
         self._logger.info("Received shutdown signal", signal=sig.name)
         await self.stop()
 
     async def stop(self, grace_period: float = 5.0) -> None:
-        """Stop the server gracefully.
-
-        Args:
-            grace_period: Seconds to wait for in-flight requests to complete
-        """
+        """Stop the server gracefully."""
         if self._server is None:
             return
 
