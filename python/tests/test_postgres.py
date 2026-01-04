@@ -142,3 +142,19 @@ class TestPostgresIntegration:
         # Verify rolled back
         result = await postgres.execute("SELECT * FROM test_rollback")
         assert len(result) == 0
+
+    async def test_execute_many_batch_insert(self):
+        """execute_many performs batch inserts correctly."""
+        await postgres.execute("CREATE TEMP TABLE test_batch (id int PRIMARY KEY, name text)")
+
+        count = await postgres.execute_many(
+            "INSERT INTO test_batch (id, name) VALUES (%s, %s)",
+            [(1, "alice"), (2, "bob"), (3, "charlie")],
+        )
+
+        assert count == 3
+
+        result = await postgres.execute("SELECT * FROM test_batch ORDER BY id")
+        assert len(result) == 3
+        assert result[0]["name"] == "alice"
+        assert result[2]["name"] == "charlie"

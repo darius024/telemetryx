@@ -41,12 +41,12 @@ async def init_pool() -> None:
         await _pool.wait()
 
         logger.info(
-            "PostreSQL pool initialized",
+            "PostgreSQL pool initialized",
             min_size=2,
             max_size=10,
         )
     except Exception as e:
-        raise DatabaseError(f"Failed to connect to PostreSQL: {e}")
+        raise DatabaseError(f"Failed to connect to PostreSQL: {e}") from e
 
 
 async def close_pool() -> None:
@@ -56,13 +56,13 @@ async def close_pool() -> None:
     if _pool is not None:
         await _pool.close()
         _pool = None
-        get_logger(__name__).info("PostreSQL pool closed")
+        get_logger(__name__).info("PostgreSQL pool closed")
 
 
 def get_pool() -> AsyncConnectionPool:
     """Get the connection pool."""
     if _pool is None:
-        raise DatabaseError("PostreSQL pool not initialized. Call init_pool() first.")
+        raise DatabaseError("PostgreSQL pool not initialized. Call init_pool() first.")
     return _pool
 
 

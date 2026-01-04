@@ -158,6 +158,16 @@ class TestRedisIntegration:
         result = await redis.counter_get("test:counter:missing")
         assert result == 0
 
+    async def test_counter_reset(self, clean_keys):
+        """Counter reset sets counter back to 0."""
+        clean_keys.append("test:counter:reset")
+
+        await redis.counter_increment("test:counter:reset", 50)
+        assert await redis.counter_get("test:counter:reset") == 50
+
+        await redis.counter_reset("test:counter:reset")
+        assert await redis.counter_get("test:counter:reset") == 0
+
     async def test_hash_set_and_get(self, clean_keys):
         """Hash set and get operations."""
         clean_keys.append("test:hash:basic")
@@ -175,6 +185,16 @@ class TestRedisIntegration:
         result = await redis.hash_get_all("test:hash:all")
 
         assert result == {"a": "1", "b": "2"}
+
+    async def test_hash_delete_field(self, clean_keys):
+        """Hash delete removes specific fields."""
+        clean_keys.append("test:hash:delete")
+
+        await redis.hash_set("test:hash:delete", {"keep": "1", "remove": "2"})
+        await redis.hash_delete("test:hash:delete", "remove")
+
+        result = await redis.hash_get_all("test:hash:delete")
+        assert result == {"keep": "1"}
 
     async def test_health_check_with_client(self):
         """Health check returns True when Redis is healthy."""

@@ -8,6 +8,8 @@ This module provides:
 - Health checks
 """
 
+from collections.abc import Awaitable, Callable
+
 from redis.asyncio import Redis
 
 from telemetryx.core import get_logger, get_settings
@@ -92,7 +94,7 @@ async def cache_delete(key: str) -> None:
 
 async def cache_get_or_set(
     key: str,
-    factory,
+    factory: Callable[[], Awaitable[str]],
     ttl_seconds: int | None = None,
 ) -> str:
     """Get from cache, or compute and cache if missing.
