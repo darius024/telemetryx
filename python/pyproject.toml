@@ -10,7 +10,10 @@ requires-python = ">=3.11"
 dependencies = [
     "grpcio>=1.60.0",
     "grpcio-tools>=1.60.0",
+    "grpcio-health-checking>=1.60.0",
+    "grpcio-reflection>=1.60.0",
     "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
     "structlog>=24.0.0",
     "redis>=5.0.0",
     "psycopg[binary]>=3.1.0",
@@ -28,9 +31,14 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+exclude = ["telemetryx/proto/*"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+# gRPC handlers use PascalCase method names (proto convention)
+"telemetryx/grpc_server/handlers.py" = ["N802"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -1,0 +1,57 @@
+// Analytics Service - Anomaly detection and analysis
+// ===================================================
+
+syntax = "proto3";
+
+package telemetryx;
+
+import "common.proto";
+
+// -----------------------------------------------------
+// Analytics Service Definition
+// -----------------------------------------------------
+
+service AnalyticsService {
+    // Detect anomalies in a batch of events
+    rpc DetectAnomalies(DetectAnomaliesRequest) returns (DetectAnomaliesResponse);
+    
+    // Health check endpoint
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// -----------------------------------------------------
+// Request/Response Messages
+// -----------------------------------------------------
+
+message DetectAnomaliesRequest {
+    // Batch of events to analyze
+    repeated Event events = 1;
+    
+    // Which detection model to use
+    string model_name = 2;
+    
+    // Sensitivity threshold (0.0 to 1.0, higher = more sensitive)
+    double sensitivity = 3;
+}
+
+message DetectAnomaliesResponse {
+    // Anomaly results for each input event
+    repeated AnomalyResult results = 1;
+    
+    // Total inference time (for monitoring)
+    int64 inference_time_ms = 2;
+}
+
+message AnomalyResult {
+    // Reference to the input event
+    string event_id = 1;
+    
+    // Is this event anomalous?
+    bool is_anomaly = 2;
+    
+    // Anomaly score (0.0 = normal, 1.0 = highly anomalous)
+    double anomaly_score = 3;
+    
+    // Human-readable explanation
+    string explanation = 4;
+}
