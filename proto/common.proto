@@ -1,0 +1,52 @@
+// Common message types shared across TelemetryX services
+// ======================================================
+
+syntax = "proto3";
+
+package telemetryx;
+
+// Use a common option for generated code package names
+option go_package = "telemetryx/proto";
+
+// -----------------------------------------------------
+// Core Event Type
+// -----------------------------------------------------
+// This is the fundamental unit of data flowing through the system.
+// Events can be logs, metrics, user actions, or any telemetry data.
+
+message Event {
+    // Unique identifier for this event (UUID format recommended)
+    string id = 1;
+    
+    // Event type/category (e.g., "page_view", "error", "metric")
+    string event_type = 2;
+    
+    // Unix timestamp in milliseconds when event occurred
+    int64 timestamp = 3;
+    
+    // Source of the event (e.g., "web-frontend", "api-server")
+    string source = 4;
+    
+    // Flexible key-value attributes for event-specific data
+    map<string, string> attributes = 5;
+    
+    // Optional numeric value (for metrics)
+    double value = 6;
+}
+
+// -----------------------------------------------------
+// Common Response Types
+// -----------------------------------------------------
+
+message Empty {}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    enum ServingStatus {
+        UNKNOWN = 0;
+        SERVING = 1;
+        NOT_SERVING = 2;
+    }
+    ServingStatus status = 1;
+}

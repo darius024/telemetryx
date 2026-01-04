@@ -1,0 +1,71 @@
+// Rules Service - Evaluate events against business rules
+// ======================================================
+
+syntax = "proto3";
+
+package telemetryx;
+
+import "common.proto";
+
+// -----------------------------------------------------
+// Rules Service Definition
+// -----------------------------------------------------
+
+service RulesService {
+    // Evaluate a single event against all active rules
+    rpc EvaluateEvent(EvaluateRequest) returns (EvaluateResponse);
+    
+    // Health check endpoint
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// -----------------------------------------------------
+// Request/Response Messages
+// -----------------------------------------------------
+
+message EvaluateRequest {
+    // The event to evaluate
+    Event event = 1;
+}
+
+message EvaluateResponse {
+    // List of rules that matched the event
+    repeated RuleMatch matches = 1;
+    
+    // Total time taken to evaluate (for monitoring)
+    int64 evaluation_time_ms = 2;
+}
+
+message RuleMatch {
+    // ID of the rule that matched
+    string rule_id = 1;
+    
+    // Name of the rule (for display)
+    string rule_name = 2;
+    
+    // Severity level of the match
+    Severity severity = 3;
+    
+    // Actions that should be triggered
+    repeated Action actions = 4;
+}
+
+// -----------------------------------------------------
+// Supporting Types
+// -----------------------------------------------------
+
+enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    INFO = 1;
+    WARNING = 2;
+    ERROR = 3;
+    CRITICAL = 4;
+}
+
+message Action {
+    // Type of action (e.g., "alert", "webhook", "log")
+    string action_type = 1;
+    
+    // Action-specific configuration as JSON string
+    string config = 2;
+}
