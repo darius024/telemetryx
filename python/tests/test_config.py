@@ -1,6 +1,5 @@
 """Tests for configuration management."""
 
-
 from telemetryx.core import Settings, get_settings
 from telemetryx.core.config import Settings as SettingsClass
 

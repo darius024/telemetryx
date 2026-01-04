@@ -1,7 +1,6 @@
 """Tests to verify proto generation and imports work correctly."""
 
 
-
 class TestProtoImports:
     """Verify all proto modules can be imported."""
 
