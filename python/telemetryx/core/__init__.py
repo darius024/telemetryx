@@ -1,8 +1,8 @@
 """Core utilities for TelemetryX Python Brain."""
 
 from telemetryx.core.config import Settings, get_settings
-from telemetryx.core.logging import setup_logging, get_logger
-from telemetryx.core.exceptions import TelemetryXError, ConfigurationError, ServiceError
+from telemetryx.core.exceptions import ConfigurationError, ServiceError, TelemetryXError
+from telemetryx.core.logging import get_logger, setup_logging
 
 __all__ = [
     "Settings",
@@ -10,6 +10,6 @@ __all__ = [
     "setup_logging",
     "get_logger",
     "TelemetryXError",
-    "ConfigurationError", 
+    "ConfigurationError",
     "ServiceError",
 ]

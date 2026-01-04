@@ -9,26 +9,24 @@ This module provides the main server class that handles:
 import asyncio
 import signal
 from concurrent import futures
-from typing import Any
 
 import grpc
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from grpc_reflection.v1alpha import reflection
 
+from telemetryx.core import Settings, get_logger, get_settings, setup_logging
 from telemetryx.grpc_server.handlers import AnalyticsServiceHandler, RulesServiceHandler
 from telemetryx.grpc_server.interceptors import LoggingInterceptor
-from telemetryx.core import Settings, get_logger, setup_logging, get_settings
 
 # Import generated proto services (we'll register handlers later)
-from telemetryx.proto import rules_pb2, analytics_pb2
-from telemetryx.proto import rules_pb2_grpc, analytics_pb2_grpc
+from telemetryx.proto import analytics_pb2, analytics_pb2_grpc, rules_pb2, rules_pb2_grpc
 
 
 class GrpcServer:
     """Async gRPC server for TelemetryX Python Brain.
-    
+
     Handles server lifecycle including graceful shutdown.
-    
+
     Example:
         server = GrpcServer()
         await server.start()
@@ -68,17 +66,11 @@ class GrpcServer:
 
         # Set initial health status
         health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
-        health_servicer.set(
-            "telemetryx.RulesService", health_pb2.HealthCheckResponse.SERVING
-        )
-        health_servicer.set(
-            "telemetryx.AnalyticsService", health_pb2.HealthCheckResponse.SERVING
-        )
+        health_servicer.set("telemetryx.RulesService", health_pb2.HealthCheckResponse.SERVING)
+        health_servicer.set("telemetryx.AnalyticsService", health_pb2.HealthCheckResponse.SERVING)
 
         # Register service handlers
-        rules_pb2_grpc.add_RulesServiceServicer_to_server(
-            RulesServiceHandler(), self._server
-        )
+        rules_pb2_grpc.add_RulesServiceServicer_to_server(RulesServiceHandler(), self._server)
         analytics_pb2_grpc.add_AnalyticsServiceServicer_to_server(
             AnalyticsServiceHandler(), self._server
         )

@@ -59,9 +59,10 @@ def setup_logging() -> None:
         level=log_level,
     )
 
+
 def get_logger(name: str | None = None, **initial_context: Any) -> structlog.BoundLogger:
     """Get a logger instance with optional initial context.q
-        
+
     Example:
         logger = get_logger(__name__, service="rules-engine")
         logger.info("Starting evaluation", rule_count=42)

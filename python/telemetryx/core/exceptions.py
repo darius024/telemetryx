@@ -8,7 +8,7 @@ from typing import Any
 
 class TelemetryXError(Exception):
     """Base exception for all TelemetryX errors.
-    
+
     Attributes:
         message: Human-readable error message
         details: Optional dictionary with additional context
@@ -27,29 +27,35 @@ class TelemetryXError(Exception):
 
 class ConfigurationError(TelemetryXError):
     """Raised when configuration is invalid or missing."""
+
     pass
 
 
 class ServiceError(TelemetryXError):
     """Raised when a service operation fails."""
+
     pass
 
 
 class RuleEvaluationError(ServiceError):
     """Raised when rule evaluation fails."""
+
     pass
 
 
 class AnomalyDetectionError(ServiceError):
     """Raised when anomaly detection fails."""
+
     pass
 
 
 class DatabaseError(TelemetryXError):
     """Raised when database operations fail."""
+
     pass
 
 
 class ConnectionError(TelemetryXError):
     """Raised when connection to external service fails."""
+
     pass

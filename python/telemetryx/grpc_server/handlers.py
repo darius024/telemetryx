@@ -3,18 +3,19 @@
 These classes implement the RPC methods defined in the proto files.
 """
 
-import grpc
 import time
 
+import grpc
+
 from telemetryx.core import get_logger
-from telemetryx.proto import common_pb2, rules_pb2, analytics_pb2
-from telemetryx.proto.rules_pb2_grpc import RulesServiceServicer
+from telemetryx.proto import analytics_pb2, common_pb2, rules_pb2
 from telemetryx.proto.analytics_pb2_grpc import AnalyticsServiceServicer
+from telemetryx.proto.rules_pb2_grpc import RulesServiceServicer
 
 
 class RulesServiceHandler(RulesServiceServicer):
     """Handler for RulesService RPCs.
-    
+
     Implements rule evaluation against incoming events.
     """
 
@@ -28,7 +29,7 @@ class RulesServiceHandler(RulesServiceServicer):
     ) -> rules_pb2.EvaluateResponse:
         """Evaluate an event against all active rules."""
         start_time = time.perf_counter()
-        
+
         event = request.event
         self._logger.info(
             "Evaluating event",
@@ -56,7 +57,7 @@ class RulesServiceHandler(RulesServiceServicer):
             matches.append(match)
 
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
-        
+
         self._logger.info(
             "Evaluation complete",
             event_id=event.id,
@@ -82,7 +83,7 @@ class RulesServiceHandler(RulesServiceServicer):
 
 class AnalyticsServiceHandler(AnalyticsServiceServicer):
     """Handler for AnalyticsService RPCs.
-    
+
     Implements anomaly detection on event batches.
     """
 
@@ -96,11 +97,11 @@ class AnalyticsServiceHandler(AnalyticsServiceServicer):
     ) -> analytics_pb2.DetectAnomaliesResponse:
         """Detect anomalies in a batch of events."""
         start_time = time.perf_counter()
-        
+
         events = request.events
         model_name = request.model_name or "default"
         sensitivity = request.sensitivity or 0.5
-        
+
         self._logger.info(
             "Detecting anomalies",
             event_count=len(events),
@@ -111,12 +112,12 @@ class AnalyticsServiceHandler(AnalyticsServiceServicer):
         # TODO: Implement actual ML inference
         # For now, return dummy results
         results: list[analytics_pb2.AnomalyResult] = []
-        
+
         for event in events:
             # Placeholder: mark events with "error" type as anomalies
             is_anomaly = event.event_type == "error"
             score = 0.9 if is_anomaly else 0.1
-            
+
             result = analytics_pb2.AnomalyResult(
                 event_id=event.id,
                 is_anomaly=is_anomaly,
@@ -126,7 +127,7 @@ class AnalyticsServiceHandler(AnalyticsServiceServicer):
             results.append(result)
 
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
-        
+
         anomaly_count = sum(1 for r in results if r.is_anomaly)
         self._logger.info(
             "Detection complete",

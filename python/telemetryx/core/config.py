@@ -4,6 +4,7 @@ Environment variables are automatically loaded and validated.
 """
 
 from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -39,6 +40,7 @@ class Settings(BaseSettings):
     def is_development(self) -> bool:
         """Check if running in production environment."""
         return self.python_env == "development"
+
 
 @lru_cache
 def get_settings() -> Settings:

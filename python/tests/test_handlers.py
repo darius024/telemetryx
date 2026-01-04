@@ -2,11 +2,11 @@
 
 import pytest
 
-from telemetryx.proto import rules_pb2, analytics_pb2, common_pb2
 from telemetryx.grpc_server.handlers import (
-    RulesServiceHandler,
     AnalyticsServiceHandler,
+    RulesServiceHandler,
 )
+from telemetryx.proto import analytics_pb2, common_pb2, rules_pb2
 
 
 class TestRulesServiceHandler:
@@ -33,10 +33,10 @@ class TestRulesServiceHandler:
                 source=sample_event_data["source"],
             )
         )
-        
+
         # Call the handler (context=None is okay for unit tests)
         response = await handler.EvaluateEvent(event, context=None)
-        
+
         # Verify response structure
         assert isinstance(response, rules_pb2.EvaluateResponse)
         assert response.evaluation_time_ms >= 0
@@ -56,9 +56,9 @@ class TestRulesServiceHandler:
                 source=sample_error_event_data["source"],
             )
         )
-        
+
         response = await handler.EvaluateEvent(event, context=None)
-        
+
         # The placeholder logic matches error events
         assert len(response.matches) == 1
         assert response.matches[0].rule_id == "rule-001"
@@ -78,9 +78,9 @@ class TestRulesServiceHandler:
                 timestamp=sample_event_data["timestamp"],
             )
         )
-        
+
         response = await handler.EvaluateEvent(event, context=None)
-        
+
         assert len(response.matches) == 0
 
 
@@ -109,9 +109,9 @@ class TestAnalyticsServiceHandler:
             model_name="default",
             sensitivity=0.5,
         )
-        
+
         response = await handler.DetectAnomalies(request, context=None)
-        
+
         assert isinstance(response, analytics_pb2.DetectAnomaliesResponse)
         assert len(response.results) == 1
         assert response.results[0].event_id == sample_event_data["id"]
@@ -132,9 +132,9 @@ class TestAnalyticsServiceHandler:
                 )
             ],
         )
-        
+
         response = await handler.DetectAnomalies(request, context=None)
-        
+
         assert response.results[0].is_anomaly is True
         assert response.results[0].anomaly_score > 0.5
 
@@ -145,7 +145,7 @@ class TestAnalyticsServiceHandler:
     ) -> None:
         """Empty event list should return empty results."""
         request = analytics_pb2.DetectAnomaliesRequest(events=[])
-        
+
         response = await handler.DetectAnomalies(request, context=None)
-        
+
         assert len(response.results) == 0

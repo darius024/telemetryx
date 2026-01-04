@@ -26,8 +26,15 @@ COPY python/pyproject.toml python/README.md ./
 # Install dependencies
 RUN pip install --upgrade pip && pip install .
 
+# Copy proto files and generation script
+COPY proto ./proto
+COPY python/scripts ./scripts
+
 # Copy source code
 COPY python/telemetryx ./telemetryx
+
+# Generate proto Python files
+RUN python scripts/generate_proto.py
 
 # Stage 2: Runtime
 FROM python:3.11-slim-bookworm AS runtime

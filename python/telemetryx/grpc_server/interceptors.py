@@ -4,7 +4,7 @@ Interceptors handle logging, metrics, and other middleware functionality.
 """
 
 import time
-from typing import Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable
 
 import grpc
 
@@ -13,7 +13,7 @@ from telemetryx.core import get_logger
 
 class LoggingInterceptor(grpc.aio.ServerInterceptor):
     """Interceptor that logs all RPC requests and responses.
-    
+
     Logs:
     - Method name
     - Request duration
@@ -33,19 +33,19 @@ class LoggingInterceptor(grpc.aio.ServerInterceptor):
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
         """Intercept and log RPC calls.
-        
+
         Args:
             continuation: The next interceptor or handler
             handler_call_details: Details about the RPC call
-            
+
         Returns:
             The RPC method handler (possibly wrapped)
         """
         method = handler_call_details.method
-        
+
         # Get the actual handler
         handler = await continuation(handler_call_details)
-        
+
         if handler is None:
             return handler
 
@@ -66,14 +66,15 @@ class LoggingInterceptor(grpc.aio.ServerInterceptor):
         method: str,
     ) -> Callable[..., Awaitable[Any]]:
         """Wrap a unary-unary handler with logging.
-        
+
         Args:
             behavior: The original handler function
             method: The RPC method name
-            
+
         Returns:
             Wrapped handler function
         """
+
         async def wrapper(
             request: Any,
             context: grpc.aio.ServicerContext,
@@ -95,13 +96,13 @@ class LoggingInterceptor(grpc.aio.ServerInterceptor):
                 raise
             finally:
                 elapsed_ms = (time.perf_counter() - start_time) * 1000
-                
+
                 log_data = {
                     "method": method,
                     "status": status,
                     "duration_ms": round(elapsed_ms, 2),
                 }
-                
+
                 if error_msg:
                     log_data["error"] = error_msg
                     self._logger.error("RPC failed", **log_data)

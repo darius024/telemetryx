@@ -1,7 +1,5 @@
 """Tests for configuration management."""
 
-import os
-import pytest
 
 from telemetryx.core import Settings, get_settings
 from telemetryx.core.config import Settings as SettingsClass
@@ -13,7 +11,7 @@ class TestSettings:
     def test_default_values(self) -> None:
         """Settings should have sensible defaults."""
         settings = Settings()
-        
+
         assert settings.grpc_host == "0.0.0.0"
         assert settings.grpc_port == 50051
         assert settings.python_env == "development"
@@ -28,7 +26,7 @@ class TestSettings:
         """is_production should return True only for production env."""
         dev_settings = Settings(python_env="development")
         prod_settings = Settings(python_env="production")
-        
+
         assert dev_settings.is_production is False
         assert prod_settings.is_production is True
 
@@ -36,7 +34,7 @@ class TestSettings:
         """is_development should return True only for development env."""
         dev_settings = Settings(python_env="development")
         prod_settings = Settings(python_env="production")
-        
+
         assert dev_settings.is_development is True
         assert prod_settings.is_development is False
 
@@ -44,7 +42,7 @@ class TestSettings:
         """database_url should be optional."""
         settings = Settings()
         assert not settings.database_url  # Empty string or None are both falsy
-        
+
         settings_with_db = Settings(database_url="postgres://localhost/test")
         assert settings_with_db.database_url == "postgres://localhost/test"
 

@@ -31,9 +31,14 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+exclude = ["telemetryx/proto/*"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+# gRPC handlers use PascalCase method names (proto convention)
+"telemetryx/grpc_server/handlers.py" = ["N802"]
 
 [tool.mypy]
 python_version = "3.11"
