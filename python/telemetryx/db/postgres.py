@@ -46,7 +46,7 @@ async def init_pool() -> None:
             max_size=10,
         )
     except Exception as e:
-        raise DatabaseError(f"Failed to connect to PostreSQL: {e}") from e
+        raise DatabaseError(f"Failed to connect to PostgreSQL: {e}") from e
 
 
 async def close_pool() -> None:
