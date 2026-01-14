@@ -61,7 +61,7 @@ def setup_logging() -> None:
 
 
 def get_logger(name: str | None = None, **initial_context: Any) -> structlog.BoundLogger:
-    """Get a logger instance with optional initial context.q
+    """Get a logger instance with optional initial context.
 
     Example:
         logger = get_logger(__name__, service="rules-engine")
