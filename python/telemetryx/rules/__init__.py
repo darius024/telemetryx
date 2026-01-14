@@ -4,6 +4,7 @@ Evaluates telemetry events against user-defined rules
 and triggers actions when conditions match.
 """
 
+from telemetryx.rules.dsl import evaluate_condition
 from telemetryx.rules.models import (
     Action,
     ActionType,
@@ -24,4 +25,5 @@ __all__ = [
     "Rule",
     "RuleMatch",
     "Severity",
+    "evaluate_condition",
 ]
