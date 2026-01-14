@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     @property
     def is_development(self) -> bool:
-        """Check if running in production environment."""
+        """Check if running in development environment."""
         return self.python_env == "development"
 
 
