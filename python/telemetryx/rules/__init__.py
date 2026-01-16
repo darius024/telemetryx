@@ -5,6 +5,7 @@ and triggers actions when conditions match.
 """
 
 from telemetryx.rules.dsl import evaluate_condition
+from telemetryx.rules.engine import RulesEngine
 from telemetryx.rules.models import (
     Action,
     ActionType,
@@ -24,6 +25,7 @@ __all__ = [
     "Operator",
     "Rule",
     "RuleMatch",
+    "RulesEngine",
     "Severity",
     "evaluate_condition",
 ]
