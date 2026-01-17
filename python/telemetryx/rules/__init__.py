@@ -16,6 +16,7 @@ from telemetryx.rules.models import (
     RuleMatch,
     Severity,
 )
+from telemetryx.rules.repository import RulesRepository
 
 __all__ = [
     "Action",
@@ -26,6 +27,7 @@ __all__ = [
     "Rule",
     "RuleMatch",
     "RulesEngine",
+    "RulesRepository",
     "Severity",
     "evaluate_condition",
 ]
